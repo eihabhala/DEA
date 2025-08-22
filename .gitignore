@@ -1,0 +1,59 @@
+# MetaTrader compiled files
+*.ex4
+*.ex5
+
+# Log files
+*.log
+Logs/
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+~*
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Package files
+*.egg-info/
+dist/
+build/
+
+# API keys and sensitive data
+config.ini
+secrets.txt
+*.key
+*.pem
+
+# Personal settings
+settings.json
+user_config.mqh
+
+# Backup files
+backup/
+*.bak
+
+# Test files
+test_results/
+*.test
