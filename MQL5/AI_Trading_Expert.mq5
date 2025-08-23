@@ -8,13 +8,13 @@
 #property version   "1.00"
 
 //--- Include custom libraries
-#include "Include/Visual_Components/Dashboard.mqh"
-#include "Include/AI_Engine/NewsAnalyzer.mqh"
-#include "Include/AI_Engine/SocialSentiment.mqh"
-#include "Include/Risk_Management/RiskManager.mqh"
-#include "Include/Utils/WebhookHandler.mqh"
-#include "Include/Utils/Logger.mqh"
-#include "Include/Utils/ATRChannel.mqh"
+#include <Visual_Components/Dashboard.mqh>
+#include <AI_Engine/NewsAnalyzer.mqh>
+#include <AI_Engine/SocialSentiment.mqh>
+#include <Risk_Management/RiskManager.mqh>
+#include <Utils/WebhookHandler.mqh>
+#include <Utils/Logger.mqh>
+#include <Utils/ATRChannel.mqh>
 #include <Trade/Trade.mqh>
 #include <Trade/PositionInfo.mqh>
 #include <Trade/OrderInfo.mqh>
@@ -499,6 +499,24 @@ void CalculatePriceTarget()
 }
 
 //+------------------------------------------------------------------+
+//| Calculate price target                                           |
+//+------------------------------------------------------------------+
+void CalculatePriceTarget()
+{
+    double current_price = SymbolInfoDouble(g_CurrentPair, SYMBOL_BID);
+    double atr_value = iATR(g_CurrentPair, PERIOD_H1, 14, 0);
+    
+    //--- Calculate target based on sentiment and ATR
+    double sentiment_factor = g_AIAnalysis.sentiment_score;
+    double target_distance = atr_value * 2.0 * MathAbs(sentiment_factor);
+    
+    if(sentiment_factor > 0)
+        g_AIAnalysis.price_target = current_price + target_distance;
+    else
+        g_AIAnalysis.price_target = current_price - target_distance;
+}
+
+//+------------------------------------------------------------------+
 //| Calculate risk score                                             |
 //+------------------------------------------------------------------+
 void CalculateRiskScore()
@@ -782,4 +800,64 @@ void ProcessATRChannelStrategy()
         ExecuteTrade(ORDER_TYPE_SELL, comment);
         g_Logger.Info("ATR Channel SELL signal executed - Channel Width: " + DoubleToString(channel_data.channel_width, 5));
     }
+}
+
+//+------------------------------------------------------------------+
+//| Update AI analysis                                               |
+//+------------------------------------------------------------------+
+void UpdateAIAnalysis()
+{
+    if(!InpEnableAIAnalysis)
+    {
+        g_Logger.Debug("AI analysis disabled");
+        return;
+    }
+    
+    g_Logger.Debug("Updating AI analysis...");
+    
+    //--- Update news analysis
+    if(g_NewsAnalyzer != NULL)
+    {
+        if(g_NewsAnalyzer.UpdateAnalysis())
+        {
+            g_AIAnalysis.sentiment_score = g_NewsAnalyzer.GetSentimentScore();
+            g_AIAnalysis.news_summary = g_NewsAnalyzer.GetNewsSummary();
+            g_AIAnalysis.confidence_level = g_NewsAnalyzer.GetConfidenceLevel();
+            g_Logger.Debug("News analysis updated - Sentiment: " + DoubleToString(g_AIAnalysis.sentiment_score, 2));
+        }
+        else
+        {
+            g_Logger.Warning("Failed to update news analysis");
+        }
+    }
+    
+    //--- Update social sentiment
+    if(g_SocialSentiment != NULL && InpEnableSocialSentiment)
+    {
+        if(g_SocialSentiment.UpdateSentiment())
+        {
+            g_AIAnalysis.social_sentiment = g_SocialSentiment.GetSentimentSummary();
+            g_Logger.Debug("Social sentiment updated: " + g_AIAnalysis.social_sentiment);
+        }
+        else
+        {
+            g_Logger.Warning("Failed to update social sentiment");
+        }
+    }
+    
+    //--- Calculate price target
+    CalculatePriceTarget();
+    
+    //--- Calculate risk score
+    CalculateRiskScore();
+    
+    //--- Generate recommendation
+    GenerateRecommendation();
+    
+    //--- Mark analysis as valid and update timestamp
+    g_AIAnalysis.is_valid = true;
+    g_AIAnalysis.last_update = TimeCurrent();
+    
+    g_Logger.Info("AI analysis completed - Recommendation: " + g_AIAnalysis.recommendation + 
+                  ", Confidence: " + DoubleToString(g_AIAnalysis.confidence_level, 2));
 }
