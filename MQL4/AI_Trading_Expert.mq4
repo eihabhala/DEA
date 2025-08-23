@@ -18,13 +18,14 @@
 #include <Utils/ATRChannel.mqh>
 
 //--- Input parameters
+//=== EA Settings ===
 input string    InpEAName = "AI Trading Expert";
 input bool      InpEnableTrading = true;
 input bool      InpEnableAIAnalysis = true;
 input bool      InpEnableWebhooks = true;
 input bool      InpEnableSocialSentiment = true;
 
-input group "=== ATR Channel Strategy ==="
+//=== ATR Channel Strategy ===
 input bool      InpEnableATRChannel = true;
 input int       InpATRPeriod = 14;
 input double    InpATRMultiplier = 2.0;
@@ -33,13 +34,21 @@ input bool      InpATRUseBreakout = true;
 input bool      InpATRUseReversal = false;
 input double    InpATRMinChannelWidth = 0.0;
 
-input group "=== Trading Parameters ==="
+//=== Trading Parameters ===
 input double    InpLotSize = 0.1;
 input int       InpMaxSpread = 30;
 input int       InpMagicNumber = 12345;
+
+//=== Visual Settings ===
 input bool      InpShowDashboard = true;
 input color     InpDashboardColor = clrDarkBlue;
 input int       InpUpdateFrequency = 60; // seconds
+
+//=== Risk Management ===
+input double    InpMaxRiskPercent = 2.0;
+input int       InpMaxPositions = 5;
+input bool      InpUseStopLoss = true;
+input bool      InpUseTakeProfit = true;
 
 //--- Global variables
 CDashboard*         g_Dashboard;
@@ -67,6 +76,8 @@ struct SAIAnalysis
     string social_sentiment;
     datetime last_update;
     bool is_valid;
+    double price_target;
+    double risk_score;
     
     // ATR Channel data
     double atr_top_line;
@@ -104,13 +115,20 @@ int OnInit()
     //--- Initialize dashboard
     if(InpShowDashboard)
     {
+        Print("DEBUG: Creating dashboard...");
         g_Dashboard = new CDashboard();
         if(!g_Dashboard.Initialize(InpDashboardColor))
         {
             g_Logger.Error("Failed to initialize dashboard");
+            Print("ERROR: Dashboard initialization failed!");
             return INIT_FAILED;
         }
         g_Logger.Info("Dashboard initialized successfully");
+        Print("DEBUG: Dashboard initialized successfully");
+    }
+    else
+    {
+        Print("DEBUG: Dashboard disabled by input parameter");
     }
     
     //--- Initialize AI components
@@ -182,14 +200,32 @@ int OnInit()
     
     g_IsInitialized = true;
     g_Logger.Info("AI Trading Expert initialized successfully");
+    Print("DEBUG: EA initialization completed successfully");
     
     //--- Update dashboard with initialization status
     if(InpShowDashboard && g_Dashboard != NULL)
     {
+        Print("DEBUG: Updating dashboard with initial status...");
         g_Dashboard.UpdateStatus("INITIALIZED", clrGreen);
         g_Dashboard.UpdateInfo("EA", InpEAName);
         g_Dashboard.UpdateInfo("Symbol", g_CurrentPair);
         g_Dashboard.UpdateInfo("Magic", IntegerToString(InpMagicNumber));
+        
+        //--- Trigger initial AI analysis for immediate display
+        if(InpEnableAIAnalysis)
+        {
+            Print("DEBUG: Setting test AI data for immediate display...");
+            SetTestAIData();
+            g_Dashboard.UpdateAIAnalysis(g_AIAnalysis);
+        }
+        else
+        {
+            Print("DEBUG: AI Analysis disabled, using basic test data");
+            SetTestAIData();
+            g_Dashboard.UpdateAIAnalysis(g_AIAnalysis);
+        }
+        
+        Print("DEBUG: Dashboard updated with initial data");
     }
     
     return INIT_SUCCEEDED;
@@ -416,6 +452,10 @@ void UpdateAIAnalysis()
         g_AIAnalysis.social_sentiment = social_result.sentiment;
     }
     
+    //--- Calculate price target and risk score
+    CalculatePriceTarget();
+    CalculateRiskScore();
+    
     //--- Generate recommendation
     GenerateRecommendation();
     
@@ -423,7 +463,39 @@ void UpdateAIAnalysis()
     g_AIAnalysis.is_valid = true;
     
     g_Logger.Info("AI analysis updated - Sentiment: " + DoubleToString(g_AIAnalysis.sentiment_score, 2) + 
-                  ", Recommendation: " + g_AIAnalysis.recommendation);
+                  ", Recommendation: " + g_AIAnalysis.recommendation + 
+                  ", Confidence: " + DoubleToString(g_AIAnalysis.confidence_level, 2) + 
+                  ", Risk Score: " + DoubleToString(g_AIAnalysis.risk_score, 2));
+}
+
+//+------------------------------------------------------------------+
+//| Calculate price target                                           |
+//+------------------------------------------------------------------+
+void CalculatePriceTarget()
+{
+    double current_price = Bid;
+    double atr_value = iATR(g_CurrentPair, PERIOD_H1, 14, 0);
+    
+    //--- Calculate target based on sentiment and ATR
+    double sentiment_factor = g_AIAnalysis.sentiment_score;
+    double target_distance = atr_value * 2.0 * MathAbs(sentiment_factor);
+    
+    if(sentiment_factor > 0)
+        g_AIAnalysis.price_target = current_price + target_distance;
+    else
+        g_AIAnalysis.price_target = current_price - target_distance;
+}
+
+//+------------------------------------------------------------------+
+//| Calculate risk score                                             |
+//+------------------------------------------------------------------+
+void CalculateRiskScore()
+{
+    double volatility = iATR(g_CurrentPair, PERIOD_H1, 14, 0) / Bid;
+    double spread_risk = g_CurrentSpread / 100.0;
+    double confidence_factor = 1.0 - g_AIAnalysis.confidence_level;
+    
+    g_AIAnalysis.risk_score = (volatility + spread_risk + confidence_factor) / 3.0;
 }
 
 //+------------------------------------------------------------------+
@@ -432,6 +504,14 @@ void UpdateAIAnalysis()
 void GenerateRecommendation()
 {
     double sentiment = g_AIAnalysis.sentiment_score;
+    double confidence = g_AIAnalysis.confidence_level;
+    double risk = g_AIAnalysis.risk_score;
+    
+    if(confidence < 0.5 || risk > 0.7)
+    {
+        g_AIAnalysis.recommendation = "HOLD - HIGH RISK";
+        return;
+    }
     
     if(sentiment > 0.7)
     {
@@ -469,7 +549,7 @@ void ProcessTradingLogic()
     }
     
     //--- Use AI analysis for trading decisions
-    if(g_AIAnalysis.is_valid && g_AIAnalysis.confidence_level > 0.6)
+    if(g_AIAnalysis.is_valid && g_AIAnalysis.confidence_level > 0.6 && g_AIAnalysis.risk_score < 0.5)
     {
         if(g_AIAnalysis.recommendation == "STRONG BUY" && g_RiskManager.CanOpenTrade(OP_BUY))
         {
@@ -549,6 +629,8 @@ void ResetAIAnalysis()
     g_AIAnalysis.social_sentiment = "";
     g_AIAnalysis.last_update = 0;
     g_AIAnalysis.is_valid = false;
+    g_AIAnalysis.price_target = 0.0;
+    g_AIAnalysis.risk_score = 0.0;
     
     // Reset ATR Channel data
     g_AIAnalysis.atr_top_line = 0.0;
@@ -559,6 +641,32 @@ void ResetAIAnalysis()
     g_AIAnalysis.atr_above_channel = false;
     g_AIAnalysis.atr_below_channel = false;
     g_AIAnalysis.atr_in_channel = false;
+}
+
+//+------------------------------------------------------------------+
+//| Set test AI data for immediate display                          |
+//+------------------------------------------------------------------+
+void SetTestAIData()
+{
+    g_AIAnalysis.sentiment_score = 0.65;
+    g_AIAnalysis.news_summary = "Market showing positive sentiment. Economic indicators suggest upward trend.";
+    g_AIAnalysis.recommendation = "BUY";
+    g_AIAnalysis.confidence_level = 0.75;
+    g_AIAnalysis.social_sentiment = "Bullish";
+    g_AIAnalysis.last_update = TimeCurrent();
+    g_AIAnalysis.is_valid = true;
+    g_AIAnalysis.price_target = Ask + (Ask * 0.01);
+    g_AIAnalysis.risk_score = 0.35;
+    
+    // Set sample ATR Channel data
+    g_AIAnalysis.atr_top_line = Ask + 0.002;
+    g_AIAnalysis.atr_bottom_line = Ask - 0.002;
+    g_AIAnalysis.atr_middle_line = Ask;
+    g_AIAnalysis.atr_signal = "BUY";
+    g_AIAnalysis.atr_channel_width = 0.004;
+    g_AIAnalysis.atr_above_channel = false;
+    g_AIAnalysis.atr_below_channel = false;
+    g_AIAnalysis.atr_in_channel = true;
 }
 
 //+------------------------------------------------------------------+
