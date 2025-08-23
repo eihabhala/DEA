@@ -39,7 +39,96 @@ cp -r Include MQL5/
 ```
 **Impact**: This was preventing the MT5 version from finding the required library files.
 
-### 3. **Missing Functions in MT5** ✅ **FIXED** (Latest Fix)
+### 4. **MT4 Test Version Dashboard Visibility** ✅ **FIXED** (Latest Fix)
+**Issue**: Test version showed input parameters but dashboard information window was not visible
+
+#### A. Fixed Dashboard Object Properties
+```mql4
+// BEFORE (Hidden)
+ObjectSetInteger(0, g_DashboardPanel, OBJPROP_HIDDEN, true);
+ObjectSetInteger(0, name, OBJPROP_HIDDEN, true);
+
+// AFTER (Visible)
+ObjectSetInteger(0, g_DashboardPanel, OBJPROP_HIDDEN, false); // Make sure it's visible
+ObjectSetInteger(0, g_DashboardPanel, OBJPROP_BACK, false);   // Foreground
+ObjectSetInteger(0, name, OBJPROP_HIDDEN, false); // Make visible
+ObjectSetInteger(0, name, OBJPROP_BACK, false);   // Foreground
+```
+
+#### B. Enhanced Dashboard Features
+```mql4
+// Added comprehensive error checking
+bool CreateDashboard()
+{
+    Print("Creating dashboard...");
+    
+    //--- Main panel with error checking
+    if(!ObjectCreate(0, g_DashboardPanel, OBJ_RECTANGLE_LABEL, 0, 0, 0))
+    {
+        Print("Error creating main panel: ", GetLastError());
+        return false;
+    }
+    // ... enhanced properties
+}
+
+// Added timer function for real-time updates
+void OnTimer()
+{
+    if(!g_IsInitialized) return;
+    
+    //--- Update market data
+    UpdateMarketData();
+    
+    //--- Calculate ATR Channel
+    if(InpEnableATRChannel)
+    {
+        CalculateATRChannel();
+    }
+    
+    //--- Update dashboard
+    if(InpShowDashboard)
+    {
+        UpdateDashboard();
+    }
+    
+    //--- Simulate AI analysis changes
+    // ... dynamic analysis updates
+}
+```
+
+#### C. Added Comprehensive Debugging
+```mql4
+// Enhanced initialization with debugging
+if(InpShowDashboard)
+{
+    if(CreateDashboard())
+    {
+        Print("✓ Dashboard created successfully - Information window should be visible!");
+        Print("✓ Look for the blue dashboard panel on the top-left of your chart");
+    }
+    else
+    {
+        Print("✗ Failed to create dashboard");
+        return INIT_FAILED;
+    }
+}
+else
+{
+    Print("⚠ Dashboard is disabled - set InpShowDashboard = true to see information window");
+}
+```
+
+#### D. Enhanced Visual Features
+- **🤖 Dashboard Title with Emojis**: Better visual identification
+- **📊 Section Headers**: Clear organization with icons
+- **Dynamic Color Coding**: Green for positive, red for negative values
+- **Real-time Updates**: Timer updates every 5 seconds
+- **Live Status Counter**: Shows EA is actively working
+- **Enhanced Layout**: Larger dashboard (380x480) for better visibility
+
+**Impact**: Test version now displays both input parameters AND the complete information dashboard just like the simple EA.
+
+### 3. **Missing Functions in MT5** ✅ **FIXED** (Previous Fix)
 **Issues Found**:
 - Missing `UpdateAIAnalysis()` function implementation
 - Missing `CalculatePriceTarget()` function implementation
@@ -256,12 +345,31 @@ The AI Trading Expert Advisor is now fully functional with:
 
 ---
 
-**Fix Summary**: ✅ **4 Critical Issues Resolved**  
+**Fix Summary**: ✅ **5 Critical Issues Resolved**  
 **Compilation Status**: ✅ **All Clean**  
 **Platform Compatibility**: ✅ **MT4/MT5 Complete**  
 **Include Path Issues**: ✅ **Fixed**  
 **Missing Functions**: ✅ **Implemented**  
+**Dashboard Visibility**: ✅ **Fixed**  
 **Ready for Use**: ✅ **Fully Operational**  
+
+## 📝 **Answer to Webhook Question**
+
+**Q: Does the webhook server have to be running for the dashboard to show?**  
+**A: NO** - The webhook server is completely independent of the dashboard display. The dashboard shows information regardless of webhook server status:
+
+- ✅ **Dashboard works WITHOUT webhook server**
+- ✅ **Market data updates independently** 
+- ✅ **ATR Channel calculations work locally**
+- ✅ **AI analysis simulations run locally**
+- ✅ **All visual components function independently**
+
+The webhook server is only needed for:
+- 🔗 Receiving external trading signals from TradingView
+- 🔗 Remote trade execution commands
+- 🔗 External API integrations
+
+The dashboard will display all information even if webhooks are disabled or the server is not running.  
 
 The AI Trading Expert Advisor is now completely fixed and ready for deployment! 🚀
 
