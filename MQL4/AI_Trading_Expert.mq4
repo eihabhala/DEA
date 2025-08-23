@@ -270,10 +270,16 @@ void OnTick()
         ProcessWebhookSignals();
     }
     
-    //--- Update dashboard
+    //--- Update dashboard with basic market info
     if(InpShowDashboard && g_Dashboard != NULL)
     {
         UpdateDashboard();
+        
+        //--- Update AI analysis if available
+        if(g_AIAnalysis.is_valid)
+        {
+            g_Dashboard.UpdateAIAnalysis(g_AIAnalysis);
+        }
     }
     
     //--- Process trading logic
@@ -511,8 +517,9 @@ void UpdateDashboard()
     
     //--- Update market information
     g_Dashboard.UpdateInfo("Spread", DoubleToString(g_CurrentSpread, 1));
-    g_Dashboard.UpdateInfo("Balance", DoubleToString(g_AccountBalance, 2));
-    g_Dashboard.UpdateInfo("Equity", DoubleToString(g_AccountEquity, 2));
+    g_Dashboard.UpdateInfo("Balance", "$" + DoubleToString(g_AccountBalance, 2));
+    g_Dashboard.UpdateInfo("Equity", "$" + DoubleToString(g_AccountEquity, 2));
+    g_Dashboard.UpdateInfo("Positions", IntegerToString(OrdersTotal()));
     
     //--- Update trading status
     if(InpEnableTrading)
@@ -523,6 +530,11 @@ void UpdateDashboard()
     {
         g_Dashboard.UpdateStatus("MONITORING", clrOrange);
     }
+    
+    //--- Update EA info
+    g_Dashboard.UpdateInfo("EA", InpEAName);
+    g_Dashboard.UpdateInfo("Symbol", g_CurrentPair);
+    g_Dashboard.UpdateInfo("Magic", IntegerToString(InpMagicNumber));
 }
 
 //+------------------------------------------------------------------+
