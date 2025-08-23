@@ -18,7 +18,7 @@ from queue import Queue
 import requests
 
 class WebhookServer:
-    def __init__(self, port=8080, mt_port=8081):
+    def __init__(self, port=5000, mt_port=8081):  # Changed default port to 5000
         self.app = Flask(__name__)
         self.port = port
         self.mt_port = mt_port

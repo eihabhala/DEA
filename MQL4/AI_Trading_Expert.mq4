@@ -9,13 +9,13 @@
 #property strict
 
 //--- Include custom libraries
-#include "Include/Visual_Components/Dashboard.mqh"
-#include "Include/AI_Engine/NewsAnalyzer.mqh"
-#include "Include/AI_Engine/SocialSentiment.mqh"
-#include "Include/Risk_Management/RiskManager.mqh"
-#include "Include/Utils/WebhookHandler.mqh"
-#include "Include/Utils/Logger.mqh"
-#include "Include/Utils/ATRChannel.mqh"
+#include <Visual_Components/Dashboard.mqh>
+#include <AI_Engine/NewsAnalyzer.mqh>
+#include <AI_Engine/SocialSentiment.mqh>
+#include <Risk_Management/RiskManager.mqh>
+#include <Utils/WebhookHandler.mqh>
+#include <Utils/Logger.mqh>
+#include <Utils/ATRChannel.mqh>
 
 //--- Input parameters
 input string    InpEAName = "AI Trading Expert";
