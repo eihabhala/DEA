@@ -104,6 +104,8 @@ int OnInit()
         {
             Print("✓ Dashboard created successfully - Information window should be visible!");
             Print("✓ Look for the blue dashboard panel on the top-left of your chart");
+            Print("✓ Total objects created: ", ObjectsTotal(0));
+            Print("✓ Dashboard panel object exists: ", ObjectFind(0, g_DashboardPanel) >= 0);
         }
         else
         {
@@ -296,40 +298,44 @@ bool CreateDashboard()
     ObjectSetInteger(0, g_DashboardPanel, OBJPROP_HIDDEN, false); // Make sure it's visible
     ObjectSetInteger(0, g_DashboardPanel, OBJPROP_BACK, false);   // Foreground
     
+    Print("Main panel created successfully");
+    
     //--- Title
-    CreateLabel("AI_Title", "🤖 AI Trading Expert Dashboard", 30, 40, clrYellow);
+    CreateLabel("AI_Title", "AI Trading Expert Dashboard", 30, 40, clrYellow);
     
     //--- Status section
-    CreateLabel("AI_StatusTitle", "=== 📊 STATUS ===", 30, 70, clrCyan);
-    CreateLabel("AI_Status", "Status: ✅ RUNNING", 30, 90, clrLime);
+    CreateLabel("AI_StatusTitle", "=== STATUS ===", 30, 70, clrCyan);
+    CreateLabel("AI_Status", "Status: RUNNING", 30, 90, clrLime);
     CreateLabel("AI_Symbol", "Symbol: " + g_CurrentPair, 30, 110, clrWhite);
     CreateLabel("AI_Magic", "Magic: " + IntegerToString(InpMagicNumber), 30, 130, clrWhite);
     CreateLabel("AI_Time", "Time: " + TimeToString(TimeCurrent()), 30, 150, clrWhite);
     
     //--- AI Analysis section
-    CreateLabel("AI_AITitle", "=== 🧠 AI ANALYSIS ===", 30, 180, clrCyan);
+    CreateLabel("AI_AITitle", "=== AI ANALYSIS ===", 30, 180, clrCyan);
     CreateLabel("AI_Sentiment", "Sentiment: 0.65 (Bullish)", 30, 200, clrLime);
     CreateLabel("AI_Recommendation", "Recommendation: BUY", 30, 220, clrLime);
     CreateLabel("AI_Confidence", "Confidence: 75%", 30, 240, clrWhite);
     CreateLabel("AI_Risk", "Risk Score: 0.35 (Low)", 30, 260, clrLime);
     
     //--- ATR Channel section
-    CreateLabel("AI_ATRTitle", "=== 📈 ATR CHANNEL ===", 30, 290, clrCyan);
+    CreateLabel("AI_ATRTitle", "=== ATR CHANNEL ===", 30, 290, clrCyan);
     CreateLabel("AI_ATRSignal", "Signal: CALCULATING...", 30, 310, clrYellow);
     CreateLabel("AI_ATRTop", "Top Line: 0.00000", 30, 330, clrWhite);
     CreateLabel("AI_ATRBottom", "Bottom Line: 0.00000", 30, 350, clrWhite);
     CreateLabel("AI_ATRWidth", "Channel Width: 0.00000", 30, 370, clrWhite);
     
     //--- Market Info section
-    CreateLabel("AI_MarketTitle", "=== 💰 MARKET INFO ===", 30, 400, clrCyan);
+    CreateLabel("AI_MarketTitle", "=== MARKET INFO ===", 30, 400, clrCyan);
     CreateLabel("AI_Spread", "Spread: 0.0", 30, 420, clrWhite);
     CreateLabel("AI_Balance", "Balance: $0.00", 30, 440, clrWhite);
     CreateLabel("AI_Equity", "Equity: $0.00", 30, 460, clrWhite);
     
+    Print("All labels created successfully");
+    
     //--- Force chart redraw
     ChartRedraw();
     
-    Print("Dashboard created with", ObjectsTotal(), " objects");
+    Print("Dashboard created with", ObjectsTotal(0), " objects");
     return true;
 }
 
@@ -421,7 +427,7 @@ void UpdateDashboard()
     //--- Update status to show it's working
     static int update_counter = 0;
     update_counter++;
-    ObjectSetString(0, "AI_Status", OBJPROP_TEXT, "Status: ✅ RUNNING (" + IntegerToString(update_counter) + ")");
+    ObjectSetString(0, "AI_Status", OBJPROP_TEXT, "Status: RUNNING (" + IntegerToString(update_counter) + ")");
     
     ChartRedraw();
 }
