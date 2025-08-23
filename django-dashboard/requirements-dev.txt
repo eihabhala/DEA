@@ -1,0 +1,35 @@
+# Django Trading Dashboard Requirements (Development)
+# Professional ML Trading Information Display Platform
+# by Camlo Technologies
+
+# Core Django
+Django==4.2.7
+djangorestframework==3.14.0
+
+# Database (SQLite for development)
+dj-database-url==2.1.0
+
+# Environment and Configuration
+python-decouple==3.8
+
+# Forms and UI
+django-crispy-forms==2.1
+crispy-bootstrap5==0.7
+
+# Utilities
+django-extensions==3.2.3
+
+# CORS
+django-cors-headers==4.3.1
+
+# Static Files
+whitenoise==6.6.0
+
+# HTTP Requests
+requests==2.31.0
+
+# Time and Date
+python-dateutil==2.8.2
+
+# Development Tools
+django-debug-toolbar==4.2.0

@@ -46,6 +46,17 @@ secrets.txt
 *.key
 *.pem
 
+# Django specific
+*.sqlite3
+db.sqlite3
+.env
+*.env
+local_settings.py
+staticfiles/
+migrations/
+*.mo
+*.pot
+
 # Personal settings
 settings.json
 user_config.mqh

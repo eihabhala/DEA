@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ app_name }} - Trading Signals{% endblock %}
+{% block page_title %}Trading Signals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex align-items-center mb-4">
+        <div class="me-4">
+            <div class="icon-wrapper" style="width: 80px; height: 80px; background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-signal" style="font-size: 2rem; color: white;"></i>
+            </div>
+        </div>
+        <div>
+            <h1 class="page-title mb-2">
+                Trading Signals
+            </h1>
+            <p class="page-subtitle mb-0">Real-time trading signals from various sources and ML models</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="filter-section">
+    <form method="get" class="row g-3">
+        <div class="col-md-3">
+            <label for="type" class="form-label">Signal Type</label>
+            <select name="type" id="type" class="form-select">
+                <option value="">All Types</option>
+                {% for signal_type in signal_types %}
+                <option value="{{ signal_type }}" {% if request.GET.type == signal_type %}selected{% endif %}>
+                    {{ signal_type }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="source" class="form-label">Source</label>
+            <select name="source" id="source" class="form-select">
+                <option value="">All Sources</option>
+                {% for source in sources %}
+                <option value="{{ source }}" {% if request.GET.source == source %}selected{% endif %}>
+                    {{ source|title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="symbol" class="form-label">Symbol</label>
+            <select name="symbol" id="symbol" class="form-select">
+                <option value="">All Symbols</option>
+                {% for sym in symbols %}
+                <option value="{{ sym.symbol }}" {% if request.GET.symbol == sym.symbol %}selected{% endif %}>
+                    {{ sym.symbol }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="executed" class="form-label">Status</label>
+            <select name="executed" id="executed" class="form-select">
+                <option value="">All Status</option>
+                <option value="true" {% if request.GET.executed == 'true' %}selected{% endif %}>Executed</option>
+                <option value="false" {% if request.GET.executed == 'false' %}selected{% endif %}>Pending</option>
+            </select>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i> Apply Filters
+            </button>
+            <a href="{% url 'ml_analytics:trading_signals' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Signals Summary -->
+<div class="row mb-4">
+    {% for summary in signals_summary %}
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card" 
+             style="border-left: 4px solid {% if summary.signal_type == 'BUY' %}#11998e{% elif summary.signal_type == 'SELL' %}#fc466b{% elif summary.signal_type == 'HOLD' %}#fdbb2d{% else %}#667eea{% endif %};">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="card-title">{{ summary.signal_type }} Signals</div>
+                    <div class="card-value">{{ summary.count }}</div>
+                    <p class="card-change mb-0">Last 7 days</p>
+                </div>
+                <div class="icon-wrapper" 
+                     style="width: 50px; height: 50px; 
+                     background: {% if summary.signal_type == 'BUY' %}linear-gradient(135deg, #11998e 0%, #38ef7d 100%){% elif summary.signal_type == 'SELL' %}linear-gradient(135deg, #fc466b 0%, #3f5efb 100%){% elif summary.signal_type == 'HOLD' %}linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%){% else %}linear-gradient(135deg, #667eea 0%, #764ba2 100%){% endif %}; 
+                     border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-{% if summary.signal_type == 'BUY' %}arrow-up{% elif summary.signal_type == 'SELL' %}arrow-down{% elif summary.signal_type == 'HOLD' %}pause{% else %}signal{% endif %}" 
+                       style="color: white; font-size: 1.2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Signals Table -->
+<div class="data-table">
+    <h5 class="mb-3">
+        <i class="fas fa-list me-2"></i>
+        Trading Signals
+        <small class="text-muted">({{ page_obj.paginator.count }} total)</small>
+    </h5>
+    
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Symbol</th>
+                    <th>Signal</th>
+                    <th>Source</th>
+                    <th>Entry Price</th>
+                    <th>Stop Loss</th>
+                    <th>Take Profit</th>
+                    <th>Confidence</th>
+                    <th>Risk Score</th>
+                    <th>Status</th>
+                    <th>P&L</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for signal in signals %}
+                <tr>
+                    <td>{{ signal.created_at|date:"M d, H:i" }}</td>
+                    <td><strong>{{ signal.symbol.symbol }}</strong></td>
+                    <td>
+                        <span class="signal-badge signal-{{ signal.signal_type|lower }}">
+                            <i class="fas fa-{% if signal.signal_type == 'BUY' %}arrow-up{% elif signal.signal_type == 'SELL' %}arrow-down{% elif signal.signal_type == 'HOLD' %}pause{% else %}times{% endif %}"></i>
+                            {{ signal.signal_type }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">{{ signal.source|title }}</span>
+                    </td>
+                    <td>
+                        {% if signal.entry_price %}
+                            {{ signal.entry_price|floatformat:5 }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if signal.stop_loss %}
+                            {{ signal.stop_loss|floatformat:5 }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if signal.take_profit %}
+                            {{ signal.take_profit|floatformat:5 }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 20px; width: 80px;">
+                            <div class="progress-bar bg-info" role="progressbar" 
+                                 style="width: {{ signal.confidence|floatformat:0|mul:100 }}%">
+                                {{ signal.confidence|floatformat:2 }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 20px; width: 80px;">
+                            <div class="progress-bar 
+                                {% if signal.risk_score <= 0.3 %}bg-success
+                                {% elif signal.risk_score <= 0.7 %}bg-warning
+                                {% else %}bg-danger{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ signal.risk_score|floatformat:0|mul:100 }}%">
+                                {{ signal.risk_score|floatformat:2 }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if signal.is_executed %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Executed
+                            </span>
+                            {% if signal.execution_time %}
+                                <small class="d-block text-muted">{{ signal.execution_time|timesince }} ago</small>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-clock"></i> Pending
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if signal.profit_loss %}
+                            <span class="{% if signal.profit_loss >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {% if signal.profit_loss >= 0 %}+{% endif %}{{ signal.profit_loss|floatformat:2 }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="11" class="text-center text-muted py-4">
+                        <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                        <br>No trading signals found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh signals every 30 seconds
+setInterval(function() {
+    if (!document.hidden) {
+        window.location.reload();
+    }
+}, 30000);
+</script>
+{% endblock %}

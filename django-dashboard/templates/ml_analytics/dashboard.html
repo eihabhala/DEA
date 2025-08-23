@@ -1,0 +1,583 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ app_name }} - Dashboard{% endblock %}
+{% block page_title %}ML Trading Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex align-items-center mb-4">
+        <div class="me-4">
+            <div class="icon-wrapper" style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-tachometer-alt" style="font-size: 2rem; color: white;"></i>
+            </div>
+        </div>
+        <div>
+            <h1 class="page-title mb-2">
+                ML Trading Dashboard
+            </h1>
+            <p class="page-subtitle mb-0">Real-time ML trading information, sentiment analysis, and market insights</p>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card" style="border-left: 4px solid #667eea;">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="card-title">Active Symbols</div>
+                    <div class="card-value">{{ stats.total_symbols }}</div>
+                    <p class="card-change mb-0">Trading pairs monitored</p>
+                </div>
+                <div class="icon-wrapper" style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-chart-line" style="color: white; font-size: 1.2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card" style="border-left: 4px solid #11998e;">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="card-title">Today's Predictions</div>
+                    <div class="card-value">{{ stats.total_predictions_today }}</div>
+                    <p class="card-change positive mb-0">ML model predictions</p>
+                </div>
+                <div class="icon-wrapper" style="width: 50px; height: 50px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-brain" style="color: white; font-size: 1.2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card" style="border-left: 4px solid #fc466b;">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="card-title">Trading Signals</div>
+                    <div class="card-value">{{ stats.total_signals_today }}</div>
+                    <p class="card-change mb-0">Signals generated today</p>
+                </div>
+                <div class="icon-wrapper" style="width: 50px; height: 50px; background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-signal" style="color: white; font-size: 1.2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card" style="border-left: 4px solid #fdbb2d;">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="card-title">Sentiment Analysis</div>
+                    <div class="card-value">{{ stats.total_sentiment_today }}</div>
+                    <p class="card-change mb-0">News items analyzed</p>
+                </div>
+                <div class="icon-wrapper" style="width: 50px; height: 50px; background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-heart" style="color: white; font-size: 1.2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4" style="animation: slideInRight 0.8s ease-out;">
+    <div class="col-lg-8">
+        <div class="chart-container hover-lift">
+            <div class="d-flex align-items-center mb-4">
+                <div class="icon-wrapper me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-chart-line" style="color: white; font-size: 1rem;"></i>
+                </div>
+                <h5 class="mb-0 fw-bold">Market Data Overview</h5>
+                <div class="ms-auto">
+                    <span class="status-indicator status-online"></span>
+                    <small class="text-muted">Live Data</small>
+                </div>
+            </div>
+            <canvas id="marketChart" height="300"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="chart-container hover-lift">
+            <div class="d-flex align-items-center mb-4">
+                <div class="icon-wrapper me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-heart" style="color: white; font-size: 1rem;"></i>
+                </div>
+                <h5 class="mb-0 fw-bold">Sentiment Distribution</h5>
+                <div class="ms-auto">
+                    <span class="status-indicator status-online"></span>
+                    <small class="text-muted">Active</small>
+                </div>
+            </div>
+            <canvas id="sentimentChart" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ML Predictions and Signals Row -->
+<div class="row mb-4">
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h5 class="mb-3">
+                <i class="fas fa-brain me-2"></i>
+                Recent ML Predictions
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Model</th>
+                            <th>Type</th>
+                            <th>Confidence</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prediction in recent_predictions %}
+                        <tr>
+                            <td><strong>{{ prediction.symbol.symbol }}</strong></td>
+                            <td>{{ prediction.model_name }}</td>
+                            <td>{{ prediction.prediction_type|title }}</td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-info" role="progressbar" 
+                                         style="width: {% widthratio prediction.confidence_score 1 100 %}%">
+                                        {{ prediction.confidence_score|floatformat:2 }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ prediction.timestamp|timesince }} ago</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted">No predictions available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-end">
+                <a href="{% url 'ml_analytics:ml_predictions' %}" class="btn btn-outline-primary btn-sm">
+                    View All Predictions <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h5 class="mb-3">
+                <i class="fas fa-signal me-2"></i>
+                Recent Trading Signals
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Signal</th>
+                            <th>Source</th>
+                            <th>Confidence</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for signal in recent_signals %}
+                        <tr>
+                            <td><strong>{{ signal.symbol.symbol }}</strong></td>
+                            <td>
+                                <span class="signal-badge signal-{{ signal.signal_type|lower }}">
+                                    {{ signal.signal_type }}
+                                </span>
+                            </td>
+                            <td>{{ signal.source|title }}</td>
+                            <td>{{ signal.confidence|floatformat:2 }}</td>
+                            <td>
+                                {% if signal.is_executed %}
+                                    <i class="fas fa-check-circle text-success"></i> Executed
+                                {% else %}
+                                    <i class="fas fa-clock text-warning"></i> Pending
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted">No signals available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-end">
+                <a href="{% url 'ml_analytics:trading_signals' %}" class="btn btn-outline-primary btn-sm">
+                    View All Signals <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Portfolio and Risk Analysis Row -->
+<div class="row mb-4">
+    {% if user.is_authenticated and user_portfolios %}
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h5 class="mb-3">
+                <i class="fas fa-briefcase me-2"></i>
+                Portfolio Overview
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Portfolio</th>
+                            <th>Balance</th>
+                            <th>P&L</th>
+                            <th>Win Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for portfolio in user_portfolios %}
+                        <tr>
+                            <td>{{ portfolio.name }}</td>
+                            <td>${{ portfolio.current_balance|floatformat:2|intcomma }}</td>
+                            <td class="{% if portfolio.total_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                ${{ portfolio.total_pnl|floatformat:2|intcomma }}
+                            </td>
+                            <td>{{ portfolio.win_rate|floatformat:1 }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-end">
+                <a href="{% url 'ml_analytics:portfolio' %}" class="btn btn-outline-primary btn-sm">
+                    Manage Portfolio <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="{% if user.is_authenticated and user_portfolios %}col-lg-6{% else %}col-lg-12{% endif %}">
+        <div class="chart-container">
+            <h5 class="mb-3">
+                <i class="fas fa-shield-alt me-2"></i>
+                Risk Metrics Summary
+            </h5>
+            {% if risk_summary %}
+            <div class="row">
+                <div class="col-6">
+                    <div class="text-center">
+                        <h6 class="text-muted">Avg VaR (1D)</h6>
+                        <h4 class="text-danger">{{ risk_summary.avg_var|floatformat:4 }}%</h4>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="text-center">
+                        <h6 class="text-muted">Avg Sharpe Ratio</h6>
+                        <h4 class="text-info">{{ risk_summary.avg_sharpe|floatformat:2 }}</h4>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="text-center">
+                        <h6 class="text-muted">Max Drawdown</h6>
+                        <h4 class="text-warning">{{ risk_summary.avg_drawdown|floatformat:2 }}%</h4>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="text-center">
+                        <h6 class="text-muted">Models Active</h6>
+                        <h4 class="text-success">{{ model_performance|length }}</h4>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-center text-muted">No risk data available</p>
+            {% endif %}
+            <div class="text-end mt-3">
+                <a href="{% url 'ml_analytics:risk_analysis' %}" class="btn btn-outline-primary btn-sm">
+                    Detailed Risk Analysis <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Performance -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="chart-container">
+            <h5 class="mb-3">
+                <i class="fas fa-trophy me-2"></i>
+                Top Performing ML Models
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Model Name</th>
+                            <th>Accuracy</th>
+                            <th>Predictions</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for model in model_performance %}
+                        <tr>
+                            <td><strong>{{ model.model_name }}</strong></td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {% widthratio model.avg_accuracy 1 100 %}%">
+                                        {{ model.avg_accuracy|floatformat:2 }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ model.total_predictions|intcomma }}</td>
+                            <td>
+                                {% if model.avg_accuracy >= 0.8 %}
+                                    <span class="badge bg-success">Excellent</span>
+                                {% elif model.avg_accuracy >= 0.7 %}
+                                    <span class="badge bg-info">Good</span>
+                                {% elif model.avg_accuracy >= 0.6 %}
+                                    <span class="badge bg-warning">Fair</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Poor</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted">No model performance data available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Market Data -->
+<div class="row">
+    <div class="col-12">
+        <div class="data-table">
+            <h5 class="mb-3">
+                <i class="fas fa-chart-line me-2"></i>
+                Recent Market Data
+            </h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Timestamp</th>
+                        <th>Open</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Close</th>
+                        <th>Volume</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in recent_market_data %}
+                    <tr>
+                        <td><strong>{{ data.symbol.symbol }}</strong></td>
+                        <td>{{ data.timestamp|date:"M d, H:i" }}</td>
+                        <td>{{ data.open_price|floatformat:5 }}</td>
+                        <td>{{ data.high_price|floatformat:5 }}</td>
+                        <td>{{ data.low_price|floatformat:5 }}</td>
+                        <td>{{ data.close_price|floatformat:5 }}</td>
+                        <td>{{ data.volume|intcomma }}</td>
+                        <td>
+                            {% with change=data.close_price %}
+                                <span class="{% if change >= data.open_price %}text-success{% else %}text-danger{% endif %}">
+                                    {{ change|floatformat:5 }}
+                                </span>
+                            {% endwith %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted">No market data available</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Market Data Chart
+const marketCtx = document.getElementById('marketChart').getContext('2d');
+
+// Create gradient for market chart
+const marketGradient = marketCtx.createLinearGradient(0, 0, 0, 400);
+marketGradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)');
+marketGradient.addColorStop(1, 'rgba(118, 75, 162, 0.1)');
+
+const marketChart = new Chart(marketCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for data in recent_market_data|slice:":10" %}'{{ data.timestamp|date:"H:i" }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Price Movement',
+            data: [{% for data in recent_market_data|slice:":10" %}{{ data.close_price }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            borderColor: '#667eea',
+            backgroundColor: marketGradient,
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#667eea',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointHoverBackgroundColor: '#667eea',
+            pointHoverBorderColor: '#ffffff',
+            pointHoverBorderWidth: 3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                borderColor: '#667eea',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: false
+            }
+        },
+        scales: {
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    color: '#6B7280',
+                    font: {
+                        family: 'Inter',
+                        size: 12
+                    }
+                }
+            },
+            y: {
+                beginAtZero: false,
+                grid: {
+                    color: 'rgba(107, 114, 128, 0.1)',
+                    borderDash: [5, 5]
+                },
+                ticks: {
+                    color: '#6B7280',
+                    font: {
+                        family: 'Inter',
+                        size: 12
+                    }
+                }
+            }
+        },
+        animation: {
+            duration: 2000,
+            easing: 'easeInOutQuart'
+        }
+    }
+});
+
+// Sentiment Chart
+const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+const sentimentChart = new Chart(sentimentCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for item in sentiment_summary %}'{{ item.sentiment_label|title }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for item in sentiment_summary %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            backgroundColor: [
+                '#11998e',  // Positive
+                '#fc466b',  // Negative
+                '#fdbb2d'   // Neutral
+            ],
+            borderWidth: 0,
+            hoverOffset: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '60%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    font: {
+                        family: 'Inter',
+                        size: 13,
+                        weight: '500'
+                    },
+                    color: '#374151'
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                borderColor: '#667eea',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: true,
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return `${label}: ${value} (${percentage}%)`;
+                    }
+                }
+            }
+        },
+        animation: {
+            animateRotate: true,
+            duration: 2000,
+            easing: 'easeInOutQuart'
+        }
+    }
+});
+
+// Function to update charts with real-time data
+function updateCharts() {
+    // Fetch fresh data via API and update charts
+    fetch('/api/v1/market-data/?limit=10')
+        .then(response => response.json())
+        .then(data => {
+            if (data.data && data.data.length > 0) {
+                marketChart.data.labels = data.data.map(item => new Date(item.timestamp).toLocaleTimeString());
+                marketChart.data.datasets[0].data = data.data.map(item => item.close);
+                marketChart.update('none');
+            }
+        })
+        .catch(error => console.log('Chart update error:', error));
+    
+    fetch('/api/v1/sentiment/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.data && data.data.length > 0) {
+                sentimentChart.data.labels = data.data.map(item => item.sentiment_label);
+                sentimentChart.data.datasets[0].data = data.data.map(item => item.count);
+                sentimentChart.update('none');
+            }
+        })
+        .catch(error => console.log('Sentiment chart update error:', error));
+}
+</script>
+{% endblock %}
