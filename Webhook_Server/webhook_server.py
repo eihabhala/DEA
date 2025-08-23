@@ -195,7 +195,7 @@ class WebhookServer:
 
 def main():
     """Main entry point"""
-    server = WebhookServer(port=8080, mt_port=8081)
+    server = WebhookServer(port=5000, mt_port=8081)
     
     try:
         server.run()

@@ -1,0 +1,65 @@
+# DodoHook Configuration
+# Professional Webhook Tunneling Solution by Camlo Technologies
+# This file configures your self-hosted webhook tunneling service
+
+server:
+  host: 0.0.0.0                    # Listen on all interfaces
+  port: 443                        # HTTPS port (use 8443 if 443 is not available)
+  domain: webhook.dodohook.com       # Your domain name (change this!)
+  ssl_cert: certs/server.crt        # SSL certificate file
+  ssl_key: certs/server.key         # SSL private key file
+
+tunnel:
+  local_host: 127.0.0.1            # Local webhook server host
+  local_port: 5000                 # Local webhook server port
+  auth_token: your-secret-auth-token-here  # Change this to a secure random string
+  max_connections: 100             # Maximum concurrent connections
+  timeout: 30                      # Request timeout in seconds
+
+security:
+  allowed_ips: []                  # Empty array = allow all IPs
+  # allowed_ips:                   # Uncomment to restrict access
+  #   - 52.89.214.238              # TradingView IP range example
+  #   - 34.212.75.30               # Add your specific IPs here
+  rate_limit: 1000                 # Maximum requests per hour per IP
+  require_auth: false              # Set to true for token authentication
+
+logging:
+  level: INFO                      # DEBUG, INFO, WARNING, ERROR
+  file: tunnel_server.log          # Log file location
+
+# Advanced settings (optional)
+advanced:
+  enable_compression: true         # Compress responses
+  enable_caching: false           # Cache static responses
+  max_request_size: 10MB          # Maximum request body size
+  cors_enabled: true              # Enable CORS headers
+
+# n8n Integration Settings
+n8n:
+  enabled: true                   # Enable n8n specific features
+  webhook_path: "/webhook/n8n"     # n8n webhook endpoint
+  workflow_tracking: true         # Track individual workflows
+  enhanced_logging: true          # Detailed n8n logging
+  response_timeout: 60            # Timeout for n8n workflows (seconds)
+
+# Automation Platform Settings
+automation:
+  platforms:
+    zapier:
+      enabled: true
+      webhook_path: "/webhook/zapier"
+      rate_limit: 5000
+    make:
+      enabled: true
+      webhook_path: "/webhook/make"
+      rate_limit: 5000
+    integromat:
+      enabled: true
+      webhook_path: "/webhook/integromat"
+      rate_limit: 3000
+  
+  # Enhanced features for automation
+  retry_failed_requests: true     # Retry failed webhook deliveries
+  queue_management: true          # Queue management for high volume
+  batch_processing: false         # Batch multiple requests

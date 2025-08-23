@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Local webhook server (your trading server)
+  webhook-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.webhook
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./webhook_server.log:/app/webhook_server.log
+      - ./mt_signals.json:/app/mt_signals.json
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Custom tunnel server (public endpoint)
+  tunnel-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./tunnel_config.yaml:/app/tunnel_config.yaml
+      - ./certs:/app/certs
+      - ./tunnel_server.log:/app/tunnel_server.log
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - webhook-server
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Monitoring with Prometheus (uncomment if needed)
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #   restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  certs:
+    driver: local
