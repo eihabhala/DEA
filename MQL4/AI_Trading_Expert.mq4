@@ -8,49 +8,50 @@
 #property version   "1.00"
 #property strict
 
-//--- Include custom libraries
-#include <Visual_Components/Dashboard.mqh>
-#include <AI_Engine/NewsAnalyzer.mqh>
-#include <AI_Engine/SocialSentiment.mqh>
-#include <Risk_Management/RiskManager.mqh>
-#include <Utils/WebhookHandler.mqh>
-#include <Utils/Logger.mqh>
-#include <Utils/ATRChannel.mqh>
+//--- Include custom libraries (temporarily disabled for testing)
+//#include <Visual_Components/Dashboard.mqh>
+//#include <AI_Engine/NewsAnalyzer.mqh>
+//#include <AI_Engine/SocialSentiment.mqh>
+//#include <Risk_Management/RiskManager.mqh>
+//#include <Utils/WebhookHandler.mqh>
+//#include <Utils/Logger.mqh>
+//#include <Utils/ATRChannel.mqh>
 
 //--- Input parameters
 //=== EA Settings ===
-input string    InpEAName = "AI Trading Expert";
-input bool      InpEnableTrading = true;
-input bool      InpEnableAIAnalysis = true;
-input bool      InpEnableWebhooks = true;
-input bool      InpEnableSocialSentiment = true;
+extern string    InpEAName = "AI Trading Expert";
+extern bool      InpEnableTrading = true;
+extern bool      InpEnableAIAnalysis = true;
+extern bool      InpEnableWebhooks = true;
+extern bool      InpEnableSocialSentiment = true;
 
 //=== ATR Channel Strategy ===
-input bool      InpEnableATRChannel = true;
-input int       InpATRPeriod = 14;
-input double    InpATRMultiplier = 2.0;
-input int       InpATRLookback = 20;
-input bool      InpATRUseBreakout = true;
-input bool      InpATRUseReversal = false;
-input double    InpATRMinChannelWidth = 0.0;
+extern bool      InpEnableATRChannel = true;
+extern int       InpATRPeriod = 14;
+extern double    InpATRMultiplier = 2.0;
+extern int       InpATRLookback = 20;
+extern bool      InpATRUseBreakout = true;
+extern bool      InpATRUseReversal = false;
+extern double    InpATRMinChannelWidth = 0.0;
 
 //=== Trading Parameters ===
-input double    InpLotSize = 0.1;
-input int       InpMaxSpread = 30;
-input int       InpMagicNumber = 12345;
+extern double    InpLotSize = 0.1;
+extern int       InpMaxSpread = 30;
+extern int       InpMagicNumber = 12345;
 
 //=== Visual Settings ===
-input bool      InpShowDashboard = true;
-input color     InpDashboardColor = clrDarkBlue;
-input int       InpUpdateFrequency = 60; // seconds
+extern bool      InpShowDashboard = true;
+extern color     InpDashboardColor = clrDarkBlue;
+extern int       InpUpdateFrequency = 60; // seconds
 
 //=== Risk Management ===
-input double    InpMaxRiskPercent = 2.0;
-input int       InpMaxPositions = 5;
-input bool      InpUseStopLoss = true;
-input bool      InpUseTakeProfit = true;
+extern double    InpMaxRiskPercent = 2.0;
+extern int       InpMaxPositions = 5;
+extern bool      InpUseStopLoss = true;
+extern bool      InpUseTakeProfit = true;
 
-//--- Global variables
+//--- Global variables (temporarily simplified for testing)
+/*
 CDashboard*         g_Dashboard;
 CNewsAnalyzer*      g_NewsAnalyzer;
 CSocialSentiment*   g_SocialSentiment;
@@ -58,6 +59,7 @@ CRiskManager*       g_RiskManager;
 CWebhookHandler*    g_WebhookHandler;
 CLogger*            g_Logger;
 CATRChannel*        g_ATRChannel;
+*/
 
 datetime            g_LastUpdate;
 bool                g_IsInitialized = false;
@@ -66,7 +68,8 @@ double              g_CurrentSpread;
 double              g_AccountBalance;
 double              g_AccountEquity;
 
-//--- AI Analysis results
+//--- AI Analysis results (temporarily commented for testing)
+/*
 struct SAIAnalysis
 {
     double sentiment_score;
@@ -91,142 +94,37 @@ struct SAIAnalysis
 };
 
 SAIAnalysis g_AIAnalysis;
+*/
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
 {
+    Print("=== AI Trading Expert MT4 Initialization Start ===");
+    Print("Parameters loaded: EA Name = ", InpEAName);
+    Print("Enable Trading = ", InpEnableTrading);
+    Print("Show Dashboard = ", InpShowDashboard);
+    Print("ATR Period = ", InpATRPeriod);
+    Print("Lot Size = ", InpLotSize);
+    Print("Magic Number = ", InpMagicNumber);
+    Print("=== Parameters verification complete ===");
+    
     Print("Initializing AI Trading Expert v1.0...");
-    
-    //--- Initialize logger first
-    g_Logger = new CLogger();
-    if(!g_Logger.Initialize("AI_Trading_Expert"))
-    {
-        Print("ERROR: Failed to initialize logger!");
-        return INIT_FAILED;
-    }
-    
-    g_Logger.Info("Starting EA initialization");
     
     //--- Initialize current pair
     g_CurrentPair = Symbol();
+    Print("Current Symbol: ", g_CurrentPair);
     
-    //--- Initialize dashboard
-    if(InpShowDashboard)
-    {
-        Print("DEBUG: Creating dashboard...");
-        g_Dashboard = new CDashboard();
-        if(!g_Dashboard.Initialize(InpDashboardColor))
-        {
-            g_Logger.Error("Failed to initialize dashboard");
-            Print("ERROR: Dashboard initialization failed!");
-            return INIT_FAILED;
-        }
-        g_Logger.Info("Dashboard initialized successfully");
-        Print("DEBUG: Dashboard initialized successfully");
-    }
-    else
-    {
-        Print("DEBUG: Dashboard disabled by input parameter");
-    }
-    
-    //--- Initialize AI components
-    if(InpEnableAIAnalysis)
-    {
-        g_NewsAnalyzer = new CNewsAnalyzer();
-        if(!g_NewsAnalyzer.Initialize())
-        {
-            g_Logger.Error("Failed to initialize news analyzer");
-            return INIT_FAILED;
-        }
-        g_Logger.Info("News analyzer initialized successfully");
-    }
-    
-    if(InpEnableSocialSentiment)
-    {
-        g_SocialSentiment = new CSocialSentiment();
-        if(!g_SocialSentiment.Initialize())
-        {
-            g_Logger.Error("Failed to initialize social sentiment analyzer");
-            return INIT_FAILED;
-        }
-        g_Logger.Info("Social sentiment analyzer initialized successfully");
-    }
-    
-    //--- Initialize risk manager
-    g_RiskManager = new CRiskManager();
-    if(!g_RiskManager.Initialize(InpLotSize, InpMagicNumber))
-    {
-        g_Logger.Error("Failed to initialize risk manager");
-        return INIT_FAILED;
-    }
-    g_Logger.Info("Risk manager initialized successfully");
-    
-    //--- Initialize webhook handler
-    if(InpEnableWebhooks)
-    {
-        g_WebhookHandler = new CWebhookHandler();
-        if(!g_WebhookHandler.Initialize(8080)) // Default port 8080
-        {
-            g_Logger.Error("Failed to initialize webhook handler");
-            return INIT_FAILED;
-        }
-        g_Logger.Info("Webhook handler initialized successfully");
-    }
-    
-    //--- Initialize ATR Channel strategy
-    if(InpEnableATRChannel)
-    {
-        g_ATRChannel = new CATRChannel();
-        if(!g_ATRChannel.Initialize(g_CurrentPair, PERIOD_CURRENT, InpATRPeriod, InpATRMultiplier))
-        {
-            g_Logger.Error("Failed to initialize ATR Channel strategy");
-            return INIT_FAILED;
-        }
-        
-        g_ATRChannel.SetUseBreakoutStrategy(InpATRUseBreakout);
-        g_ATRChannel.SetUseReversalStrategy(InpATRUseReversal);
-        g_ATRChannel.SetMinChannelWidth(InpATRMinChannelWidth);
-        
-        g_Logger.Info("ATR Channel strategy initialized successfully");
-    }
-    
-    //--- Initialize AI analysis structure
-    ResetAIAnalysis();
+    //--- Basic initialization without complex dependencies
+    Print("=== BASIC INITIALIZATION TEST ===");
+    Print("All parameters accessible - EA loading successful");
     
     //--- Set timer for regular updates
     EventSetTimer(InpUpdateFrequency);
     
     g_IsInitialized = true;
-    g_Logger.Info("AI Trading Expert initialized successfully");
-    Print("DEBUG: EA initialization completed successfully");
-    
-    //--- Update dashboard with initialization status
-    if(InpShowDashboard && g_Dashboard != NULL)
-    {
-        Print("DEBUG: Updating dashboard with initial status...");
-        g_Dashboard.UpdateStatus("INITIALIZED", clrGreen);
-        g_Dashboard.UpdateInfo("EA", InpEAName);
-        g_Dashboard.UpdateInfo("Symbol", g_CurrentPair);
-        g_Dashboard.UpdateInfo("Magic", IntegerToString(InpMagicNumber));
-        
-        //--- Trigger initial AI analysis for immediate display
-        if(InpEnableAIAnalysis)
-        {
-            Print("DEBUG: Setting test AI data for immediate display...");
-            SetTestAIData();
-            g_Dashboard.UpdateAIAnalysis(g_AIAnalysis);
-        }
-        else
-        {
-            Print("DEBUG: AI Analysis disabled, using basic test data");
-            SetTestAIData();
-            g_Dashboard.UpdateAIAnalysis(g_AIAnalysis);
-        }
-        
-        Print("DEBUG: Dashboard updated with initial data");
-    }
+    Print("AI Trading Expert initialized successfully - ALL INPUTS WORKING");
     
     return INIT_SUCCEEDED;
 }
