@@ -68,3 +68,6 @@ backup/
 # Test files
 test_results/
 *.test
+
+# Management tools
+management-tools/

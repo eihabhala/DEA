@@ -4,12 +4,12 @@ This directory contains tools for managing the DEA repository.
 
 ## Tools Overview
 
-### 1. dea-manager.sh
+### 1. management-tools/dea-manager.sh
 Main wrapper script that provides a unified interface for all management functions.
 
 **Usage:**
 ```bash
-./dea-manager.sh [command]
+./management-tools/dea-manager.sh [command]
 ```
 
 **Commands:**
@@ -19,7 +19,7 @@ Main wrapper script that provides a unified interface for all management functio
 - `status` - Show repository status
 - `help` - Display help message
 
-### 2. dea-updater.sh
+### 2. management-tools/dea-updater.sh
 Script that updates the DEA repository with the latest changes from the remote.
 
 **Features:**
@@ -27,7 +27,7 @@ Script that updates the DEA repository with the latest changes from the remote.
 - Pulls changes if the local repository is behind
 - Provides detailed logging of operations
 
-### 3. dea-checker.sh
+### 3. management-tools/dea-checker.sh
 Script that checks the DEA repository for common issues and problems.
 
 **Features:**
@@ -48,22 +48,22 @@ The scripts are already in the DEA repository and are ready to use.
 
 ### Update the repository:
 ```bash
-./dea-manager.sh update
+./management-tools/dea-manager.sh update
 ```
 
 ### Check the repository for issues:
 ```bash
-./dea-manager.sh check
+./management-tools/dea-manager.sh check
 ```
 
 ### Update and check the repository:
 ```bash
-./dea-manager.sh both
+./management-tools/dea-manager.sh both
 ```
 
 ### Show repository status:
 ```bash
-./dea-manager.sh status
+./management-tools/dea-manager.sh status
 ```
 
 ## Common Issues Checked
@@ -90,10 +90,10 @@ You can automate these checks by adding a cron job:
 
 ```bash
 # Run daily checks at 2 AM
-0 2 * * * cd /home/eboalking/DEA && ./dea-manager.sh check
+0 2 * * * cd /home/eboalking/DEA && ./management-tools/dea-manager.sh check
 
 # Run weekly updates on Sunday at 3 AM
-0 3 * * 0 cd /home/eboalking/DEA && ./dea-manager.sh update
+0 3 * * 0 cd /home/eboalking/DEA && ./management-tools/dea-manager.sh update
 ```
 
 ## Contributing

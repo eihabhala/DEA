@@ -133,7 +133,7 @@ input bool      InpATRUseReversal = false;         // Enable reversal signals
 2. Set webhook URL: `http://your-server:5000/webhook`
 3. Use JSON message format:
 
-```json
+``json
 {
     "action": "{{strategy.order.action}}",
     "symbol": "{{ticker}}",
@@ -217,24 +217,24 @@ input bool      InpATRUseReversal = false;         // Enable reversal signals
 This repository includes automated tools for maintaining and checking the codebase:
 
 ### Management Scripts
-- **[dea-manager.sh](dea-manager.sh)** - Main wrapper for all management functions
-- **[dea-updater.sh](dea-updater.sh)** - Updates repository with latest changes
-- **[dea-checker.sh](dea-checker.sh)** - Checks repository for common issues
-- **[xnox-manage.sh](xnox-manage.sh)** - Organization-level management tools
+- **[management-tools/dea-manager.sh](management-tools/dea-manager.sh)** - Main wrapper for all management functions
+- **[management-tools/dea-updater.sh](management-tools/dea-updater.sh)** - Updates repository with latest changes
+- **[management-tools/dea-checker.sh](management-tools/dea-checker.sh)** - Checks repository for common issues
+- **[management-tools/xnox-manage.sh](management-tools/xnox-manage.sh)** - Organization-level management tools
 
 ### Usage Examples
 ```bash
 # Check repository for issues
-./dea-checker.sh
+./management-tools/dea-checker.sh
 
 # Update repository with latest changes
-./dea-updater.sh
+./management-tools/dea-updater.sh
 
 # Update and check repository
-./dea-manager.sh both
+./management-tools/dea-manager.sh both
 
 # Show repository status
-./dea-manager.sh status
+./management-tools/dea-manager.sh status
 ```
 
 ### Features
@@ -247,9 +247,9 @@ This repository includes automated tools for maintaining and checking the codeba
 ### Organization-Level Tools
 For managing all xnox-me repositories:
 - **[XNOX_MANAGEMENT_README.md](XNOX_MANAGEMENT_README.md)** - Documentation for organization tools
-- **[xnox-repo-checker.sh](xnox-repo-checker.sh)** - Checks all repositories for issues
-- **[xnox-update-all.sh](xnox-update-all.sh)** - Updates all repositories
-- **[xnox-manage.sh](xnox-manage.sh)** - Wrapper for organization-level functions
+- **[management-tools/xnox-repo-checker.sh](management-tools/xnox-repo-checker.sh)** - Checks all repositories for issues
+- **[management-tools/xnox-update-all.sh](management-tools/xnox-update-all.sh)** - Updates all repositories
+- **[management-tools/xnox-manage.sh](management-tools/xnox-manage.sh)** - Wrapper for organization-level functions
 
 ## 🚨 **Important Disclaimers**
 
