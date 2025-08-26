@@ -28,6 +28,27 @@ pip install -r requirements.txt
 # Copy MQL4/MQL5 files to your MetaTrader data directory
 ```
 
+### 🐳 **VPS Deployment (Recommended)**
+For production VPS deployment with full containerization:
+
+```bash
+# Quick VPS deployment
+cd VPS-Docker
+./deploy.sh --platform MT5 --domain your-domain.com
+
+# Or manual setup
+cp .env.example .env  # Edit configuration
+docker-compose up -d
+```
+
+**VPS Features:**
+- 🐳 Full Docker containerization
+- 🔒 SSL/TLS encryption
+- 📊 Grafana monitoring dashboards
+- 🔁 Automated backups
+- 🖥️ VNC remote access
+- ⚙️ One-command deployment
+
 ### Quick Setup
 1. Load `AI_Trading_Expert.ex4` or `AI_Trading_Expert.ex5` on your chart
 2. Configure parameters (see [Configuration Guide](Documentation/README.md))
@@ -43,6 +64,7 @@ pip install -r requirements.txt
 | **🎨 Professional Dashboard** | • Real-time Status Display<br>• AI Analysis Panel<br>• ATR Channel Visualization<br>• Interactive Controls |
 | **🔗 Advanced Integration** | • TradingView Webhooks<br>• Multi-Platform Signals<br>• Python Server<br>• Real-time Processing |
 | **🛡️ Enterprise Risk Management** | • Position Sizing<br>• Drawdown Protection<br>• Multi-Position Management<br>• Dynamic SL/TP |
+| **🐳 VPS Containerization** | • Docker Support<br>• One-Click Deployment<br>• Auto-Scaling<br>• Monitoring Stack |
 
 ## 📁 **Repository Structure**
 

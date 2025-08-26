@@ -1,0 +1,218 @@
+version: '3.8'
+
+services:
+  # Nginx Proxy with SSL termination
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: dea-nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - webhook-server
+    restart: unless-stopped
+    networks:
+      - trading-network
+
+  # Webhook Server (Python Flask)
+  webhook-server:
+    build:
+      context: ./webhook-server
+      dockerfile: Dockerfile
+    container_name: dea-webhook-server
+    ports:
+      - "5000:5000"
+      - "8081:8081"  # MT communication port
+    volumes:
+      - ./data/webhook:/app/data
+      - ./logs/webhook:/app/logs
+      - ./config/webhook.yaml:/app/config.yaml:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - WEBHOOK_PORT=5000
+      - MT_PORT=8081
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - trading-network
+
+  # MetaTrader 4 Container
+  metatrader4:
+    build:
+      context: ./mt4-container
+      dockerfile: Dockerfile
+    container_name: dea-mt4
+    volumes:
+      - ./data/mt4:/home/mt4/.wine/drive_c/Program Files (x86)/MetaTrader 4
+      - ./config/mt4:/home/mt4/config:ro
+      - ./logs/mt4:/home/mt4/logs
+      - ./MQL4:/home/mt4/.wine/drive_c/Program Files (x86)/MetaTrader 4/MQL4:ro
+    environment:
+      - DISPLAY=:1
+      - VNC_PASSWORD=${VNC_PASSWORD:-trading123}
+      - MT_SERVER=${MT4_SERVER:-Demo-Server}
+      - MT_LOGIN=${MT4_LOGIN:-12345678}
+      - MT_PASSWORD=${MT4_PASSWORD:-password}
+      - WEBHOOK_URL=http://webhook-server:5000/webhook
+    ports:
+      - "5901:5901"  # VNC access
+    restart: unless-stopped
+    depends_on:
+      - webhook-server
+    networks:
+      - trading-network
+    profiles:
+      - mt4
+
+  # MetaTrader 5 Container  
+  metatrader5:
+    build:
+      context: ./mt5-container
+      dockerfile: Dockerfile
+    container_name: dea-mt5
+    volumes:
+      - ./data/mt5:/home/mt5/.wine/drive_c/Program Files/MetaTrader 5
+      - ./config/mt5:/home/mt5/config:ro
+      - ./logs/mt5:/home/mt5/logs
+      - ./MQL5:/home/mt5/.wine/drive_c/Program Files/MetaTrader 5/MQL5:ro
+    environment:
+      - DISPLAY=:1
+      - VNC_PASSWORD=${VNC_PASSWORD:-trading123}
+      - MT_SERVER=${MT5_SERVER:-Demo-Server}
+      - MT_LOGIN=${MT5_LOGIN:-12345678}
+      - MT_PASSWORD=${MT5_PASSWORD:-password}
+      - WEBHOOK_URL=http://webhook-server:5000/webhook
+    ports:
+      - "5902:5901"  # VNC access (different port from MT4)
+    restart: unless-stopped
+    depends_on:
+      - webhook-server
+    networks:
+      - trading-network
+    profiles:
+      - mt5
+
+  # Prometheus for monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: dea-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - trading-network
+    profiles:
+      - monitoring
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dea-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - trading-network
+    profiles:
+      - monitoring
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: dea-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./config/redis.conf:/etc/redis/redis.conf:ro
+    command: redis-server /etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - trading-network
+
+  # PostgreSQL for trade logging and analytics
+  postgres:
+    image: postgres:15-alpine
+    container_name: dea-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-trading_db}
+      - POSTGRES_USER=${POSTGRES_USER:-trader}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secure_password}
+    restart: unless-stopped
+    networks:
+      - trading-network
+    profiles:
+      - database
+
+  # Backup service
+  backup-service:
+    build:
+      context: ./backup-service
+      dockerfile: Dockerfile
+    container_name: dea-backup
+    volumes:
+      - ./data:/backup/source:ro
+      - ./backups:/backup/destination
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-0 2 * * *}  # Daily at 2 AM
+      - BACKUP_RETENTION=${BACKUP_RETENTION:-7}         # Keep 7 days
+      - S3_BUCKET=${S3_BACKUP_BUCKET:-}                # Optional S3 backup
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-}
+      - S3_SECRET_KEY=${S3_SECRET_KEY:-}
+    restart: unless-stopped
+    networks:
+      - trading-network
+    profiles:
+      - backup
+
+networks:
+  trading-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
