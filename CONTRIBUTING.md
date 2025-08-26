@@ -33,8 +33,8 @@ Thank you for your interest in contributing to the AI Trading Expert Advisor pro
 ### Environment Setup
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ai-trading-expert.git
-cd ai-trading-expert
+git clone https://github.com/xnox-me/DEA.git
+cd DEA
 
 # Set up Python environment
 cd Webhook_Server

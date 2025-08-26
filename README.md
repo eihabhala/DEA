@@ -17,8 +17,8 @@
 ### Installation
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/ai-trading-expert.git
-cd ai-trading-expert
+git clone https://github.com/xnox-me/DEA.git
+cd DEA
 
 # 2. Install Python dependencies
 cd Webhook_Server
@@ -36,35 +36,13 @@ pip install -r requirements.txt
 
 ## ✨ **Key Features**
 
-### 🧠 **AI-Powered Analysis**
-- **Real-time News Analysis**: Fetches and analyzes financial news using advanced NLP
-- **Social Media Sentiment**: Monitors social platforms for market sentiment
-- **Market Impact Assessment**: AI-driven evaluation of news impact on currency pairs
-- **Confidence Scoring**: Machine learning confidence levels for trading decisions
-
-### 📊 **ATR Channel Strategy**
-- **Dynamic Support/Resistance**: Volatility-adaptive channel trading
-- **Breakout Signals**: Momentum-based entry signals
-- **Reversal Signals**: Mean reversion trading opportunities
-- **Risk-Adjusted Sizing**: Automatic position sizing based on volatility
-
-### 🎨 **Professional Dashboard**
-- **Real-time Status Display**: Live EA status and market conditions
-- **AI Analysis Panel**: Sentiment scores, recommendations, confidence levels
-- **ATR Channel Visualization**: Live channel data and position tracking
-- **Interactive Controls**: Manual trading controls and system management
-
-### 🔗 **Advanced Integration**
-- **TradingView Webhooks**: Direct signal reception from TradingView alerts
-- **Multi-Platform Signals**: Compatible with various signal providers
-- **Python Server**: Robust webhook processing with error handling
-- **Real-time Processing**: Instant signal execution with minimal latency
-
-### 🛡️ **Enterprise Risk Management**
-- **Position Sizing**: Risk-based and fixed lot sizing options
-- **Drawdown Protection**: Maximum drawdown limits with automatic reduction
-- **Multi-Position Management**: Intelligent handling of concurrent trades
-- **Stop Loss/Take Profit**: Dynamic SL/TP based on market conditions
+| Category | Features |
+|----------|----------|
+| **🧠 AI-Powered Analysis** | • Real-time News Analysis<br>• Social Media Sentiment<br>• Market Impact Assessment<br>• Confidence Scoring |
+| **📊 ATR Channel Strategy** | • Dynamic Support/Resistance<br>• Breakout Signals<br>• Reversal Signals<br>• Risk-Adjusted Sizing |
+| **🎨 Professional Dashboard** | • Real-time Status Display<br>• AI Analysis Panel<br>• ATR Channel Visualization<br>• Interactive Controls |
+| **🔗 Advanced Integration** | • TradingView Webhooks<br>• Multi-Platform Signals<br>• Python Server<br>• Real-time Processing |
+| **🛡️ Enterprise Risk Management** | • Position Sizing<br>• Drawdown Protection<br>• Multi-Position Management<br>• Dynamic SL/TP |
 
 ## 📁 **Repository Structure**
 
@@ -130,7 +108,7 @@ input bool      InpATRUseReversal = false;         // Enable reversal signals
 
 ### Webhook Setup
 1. Create TradingView alert
-2. Set webhook URL: `http://your-server:8080/webhook`
+2. Set webhook URL: `http://your-server:5000/webhook`
 3. Use JSON message format:
 
 ```json
@@ -245,7 +223,7 @@ This project is private and proprietary. All rights reserved.
 ---
 
 **Version**: 1.0  
-**Last Updated**: 2024  
+**Last Updated**: August 2025  
 **Compatibility**: MT4/MT5  
 **Platform**: Windows  
 **Language**: MQL4/MQL5, Python  

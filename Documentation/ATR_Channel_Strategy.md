@@ -35,25 +35,14 @@ input bool      InpATRUseReversal = false;         // Enable reversal signals
 input double    InpATRMinChannelWidth = 0.0;       // Minimum channel width filter
 ```
 
-### Parameter Explanations
-
-#### ATR Period (Default: 14)
-- **Range**: 5-50
-- **Low values (5-10)**: More responsive to recent volatility
-- **High values (20-50)**: Smoother, less noisy signals
-- **Recommended**: 14 for most timeframes
-
-#### ATR Multiplier (Default: 2.0)
-- **Range**: 1.0-5.0
-- **Low values (1.0-1.5)**: Narrow channels, more signals
-- **High values (2.5-5.0)**: Wide channels, fewer but stronger signals
-- **Recommended**: 2.0 for balanced approach
-
-#### Lookback Period (Default: 20)
-- **Range**: 10-50
-- **Purpose**: Determines middle line calculation period
-- **Low values**: More responsive to recent price action
-- **High values**: Smoother middle line
+| Parameter | Default | Range | Description |
+|-----------|---------|-------|-------------|
+| **ATR Period** | 14 | 5-50 | Period for ATR calculation |
+| **ATR Multiplier** | 2.0 | 1.0-5.0 | Channel width multiplier |
+| **Lookback Period** | 20 | 10-50 | Middle line calculation period |
+| **Use Breakout** | true | true/false | Enable breakout signals |
+| **Use Reversal** | false | true/false | Enable reversal signals |
+| **Min Channel Width** | 0.0 | 0.0+ | Minimum channel width filter |
 
 #### Strategy Types
 

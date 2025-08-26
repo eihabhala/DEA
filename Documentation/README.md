@@ -39,7 +39,7 @@
 4. **Add URLs to whitelist**: Add these URLs to the WebRequest whitelist:
    - `https://nfs.faireconomy.media`
    - `https://api.twitter.com`
-   - `http://localhost:8080`
+   - `http://localhost:5000`
 
 #### Step 3: Webhook Server Setup (Optional)
 
@@ -53,7 +53,7 @@
    python webhook_server.py
    ```
 
-3. Configure TradingView alerts to send to: `http://your-ip:8080/webhook`
+3. Configure TradingView alerts to send to: `http://your-server:5000/webhook`
 
 #### Step 4: Expert Advisor Configuration
 
@@ -124,7 +124,7 @@ The AI Trading Expert features a comprehensive dashboard displaying:
 #### TradingView Setup
 
 1. Create a TradingView alert
-2. Set webhook URL: `http://your-server:8080/webhook`
+2. Set webhook URL: `http://your-server:5000/webhook`
 3. Use this JSON format for the message:
 
 ```json
@@ -259,13 +259,13 @@ Trading foreign exchange and CFDs involves significant risk and may result in th
 
 ### 📄 License
 
-Copyright 2024, AI Trading Team. All rights reserved.
+Copyright 2024-2025, AI Trading Team. All rights reserved.
 
 This software is provided for educational and trading purposes. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the copyright notice and this disclaimer are retained.
 
 ---
 
 **Version**: 1.0
-**Last Updated**: 2024
+**Last Updated**: August 2025
 **Compatibility**: MT4/MT5
 **Support**: Available through official channels
