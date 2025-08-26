@@ -108,7 +108,7 @@ echo 5. Create repository
 echo 6. Copy the repository URL
 echo 7. Run these commands:
 echo.
-echo    git remote add origin https://github.com/YOUR_USERNAME/ai-trading-expert-advisor.git
+echo    git remote add origin https://github.com/xnox-me/ai-trading-expert-advisor.git
 echo    git branch -M main
 echo    git push -u origin main
 echo.
