@@ -104,7 +104,7 @@ AI_Expert_Advisor/
 ## ⚙️ **Configuration**
 
 ### Basic Settings
-```mql4
+``mql4
 // Core EA Settings
 input bool      InpEnableTrading = true;           // Enable live trading
 input bool      InpEnableAIAnalysis = true;        // Enable AI analysis
@@ -211,6 +211,45 @@ input bool      InpATRUseReversal = false;         // Enable reversal signals
 - **AI Analysis**: Current sentiment and recommendations
 - **ATR Channel**: Live channel data and signals
 - **Position Tracking**: Open positions and P&L
+
+## 🛠️ **Repository Management Tools**
+
+This repository includes automated tools for maintaining and checking the codebase:
+
+### Management Scripts
+- **[dea-manager.sh](dea-manager.sh)** - Main wrapper for all management functions
+- **[dea-updater.sh](dea-updater.sh)** - Updates repository with latest changes
+- **[dea-checker.sh](dea-checker.sh)** - Checks repository for common issues
+- **[xnox-manage.sh](xnox-manage.sh)** - Organization-level management tools
+
+### Usage Examples
+```bash
+# Check repository for issues
+./dea-checker.sh
+
+# Update repository with latest changes
+./dea-updater.sh
+
+# Update and check repository
+./dea-manager.sh both
+
+# Show repository status
+./dea-manager.sh status
+```
+
+### Features
+- **Automated Issue Detection**: Finds placeholder text, missing files, TODO comments
+- **Setup Script Validation**: Verifies setup scripts have correct URLs
+- **Documentation Verification**: Ensures documentation is up to date
+- **Large File Detection**: Identifies files that shouldn't be in Git
+- **Detailed Logging**: Comprehensive logs of all checks and updates
+
+### Organization-Level Tools
+For managing all xnox-me repositories:
+- **[XNOX_MANAGEMENT_README.md](XNOX_MANAGEMENT_README.md)** - Documentation for organization tools
+- **[xnox-repo-checker.sh](xnox-repo-checker.sh)** - Checks all repositories for issues
+- **[xnox-update-all.sh](xnox-update-all.sh)** - Updates all repositories
+- **[xnox-manage.sh](xnox-manage.sh)** - Wrapper for organization-level functions
 
 ## 🚨 **Important Disclaimers**
 
