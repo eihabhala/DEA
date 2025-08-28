@@ -27,6 +27,16 @@ This directory contains everything needed to deploy the AI Trading Expert Adviso
 - Log aggregation and rotation
 - Backup and restore scripts
 
+## 📘 Connection Settings Guide
+
+For detailed information about all connection settings, see:
+- [CONNECTIONS_README.md](CONNECTIONS_README.md) - Complete guide to all connection settings
+- [SETTINGS_README.md](SETTINGS_README.md) - Enhanced configuration guide with detailed file mappings
+- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Quick reference for essential settings and commands
+- [WEBHOOK_TROUBLESHOOTING.md](WEBHOOK_TROUBLESHOOTING.md) - Troubleshooting guide for webhook server issues
+- [config/connections.conf](config/connections.conf) - Centralized connection configuration
+- [.env](.env) - Environment variables with credentials
+
 ## 🚀 Quick Deployment
 
 ### Prerequisites
@@ -54,12 +64,32 @@ cp ../MQL5/* ./mt5-container/MQL5/Experts/
 cp .env.example .env
 nano .env  # Edit your settings
 
-# 3. Start containers
-docker-compose up -d
+# 3. Start all containers with connection settings
+./start-all-services.sh
 
 # 4. Check status
 docker-compose ps
 ```
+
+### Quick Start Script
+
+For an automated way to start all services with proper connection settings, use the provided script:
+
+```bash
+# Make the script executable (if not already)
+chmod +x start-all-services.sh
+
+# Start all services
+./start-all-services.sh
+```
+
+This script will:
+1. Start Redis (required dependency)
+2. Start the Webhook Server
+3. Start Monitoring Services (Grafana & Prometheus)
+4. Start Database Service (PostgreSQL)
+5. Start MetaTrader 5 Container
+6. Display connection information and next steps
 
 ## 📊 Container Architecture
 
@@ -125,21 +155,55 @@ risk_management:
 
 ## 🎛️ Management Commands
 
+### Platform-Specific Scripts
+
+For users who want to manage only a specific MetaTrader platform container without affecting other services, we provide dedicated scripts:
+
+#### MT4-Specific Scripts
+- [start-dea-mt4.sh](start-dea-mt4.sh) - Starts only the MT4 container with its required dependencies
+- [stop-dea-mt4.sh](stop-dea-mt4.sh) - Stops only the MT4 container
+- [MT4_START_STOP_README.md](MT4_START_STOP_README.md) - Documentation for the MT4-specific scripts
+
+#### MT5-Specific Scripts
+- [start-dea-mt5.sh](start-dea-mt5.sh) - Starts only the MT5 container with its required dependencies
+- [stop-dea-mt5.sh](stop-dea-mt5.sh) - Stops only the MT5 container
+- [MT5_START_STOP_README.md](MT5_START_STOP_README.md) - Documentation for the MT5-specific scripts
+
+These scripts are useful when you want to:
+- Test platform configurations independently
+- Restart only a specific platform container without affecting other services
+- Manage platform resources separately from the rest of the system
+
 ### Container Management
 ```bash
-# Start services
-./scripts/start.sh
+# Start all services
+./start-all-services.sh
 
-# Stop services
+# Start only MT4 container (with dependencies)
+./start-dea-mt4.sh
+
+# Stop only MT4 container
+./stop-dea-mt4.sh
+
+# Start only MT5 container (with dependencies)
+./start-dea-mt5.sh
+
+# Stop only MT5 container
+./stop-dea-mt5.sh
+
+# Stop all services
 ./scripts/stop.sh
 
 # Restart specific service
+./scripts/restart.sh mt4-container
 ./scripts/restart.sh mt5-container
 
 # View logs
+./scripts/logs.sh mt4-container
 ./scripts/logs.sh mt5-container
 
 # Update EA files
+./scripts/update-ea.sh --platform mt4
 ./scripts/update-ea.sh --platform mt5
 ```
 

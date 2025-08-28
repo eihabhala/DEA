@@ -1,0 +1,21 @@
+# Sensitive configuration files
+config/connections.conf
+config/*/terminal.ini
+.env
+.env.example
+
+# Log files
+logs/
+
+# Data files
+data/
+
+# Backup files
+backups/
+
+# Temporary files
+*.tmp
+*.temp
+
+# VNC password files
+*.vnc
