@@ -31,8 +31,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 # Copy application files
 COPY *.py ./
-COPY config/ ./config/
-COPY templates/ ./templates/
+# Note: config and templates directories will be mounted as volumes
 
 # Create necessary directories
 RUN mkdir -p /app/data /app/logs /app/backups \
@@ -49,4 +48,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
 # Start command with proper signal handling
-CMD ["python3", "webhook_server_enhanced.py"]
+CMD ["python3", "webhook_server.py"]

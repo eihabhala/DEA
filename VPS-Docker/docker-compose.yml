@@ -55,6 +55,7 @@ services:
     volumes:
       - ./data/mt4:/home/mt4/.wine/drive_c/Program Files (x86)/MetaTrader 4
       - ./config/mt4:/home/mt4/config:ro
+      - ./config/connections.conf:/home/mt4/connections.conf:ro
       - ./logs/mt4:/home/mt4/logs
       - ./MQL4:/home/mt4/.wine/drive_c/Program Files (x86)/MetaTrader 4/MQL4:ro
     environment:
@@ -83,6 +84,7 @@ services:
     volumes:
       - ./data/mt5:/home/mt5/.wine/drive_c/Program Files/MetaTrader 5
       - ./config/mt5:/home/mt5/config:ro
+      - ./config/connections.conf:/home/mt5/connections.conf:ro
       - ./logs/mt5:/home/mt5/logs
       - ./MQL5:/home/mt5/.wine/drive_c/Program Files/MetaTrader 5/MQL5:ro
     environment:

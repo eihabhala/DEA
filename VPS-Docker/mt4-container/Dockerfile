@@ -12,9 +12,10 @@ ENV MT_USER=mt4
 ENV MT_HOME=/home/${MT_USER}
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN dpkg --add-architecture i386 \
+    && apt-get update && apt-get install -y \
     # Wine dependencies
-    wine32 \
+    wine \
     winetricks \
     # X11 and VNC
     xvfb \
@@ -65,7 +66,7 @@ COPY --chown=${MT_USER}:${MT_USER} scripts/ ${MT_HOME}/scripts/
 COPY --chown=${MT_USER}:${MT_USER} config/ ${MT_HOME}/config/
 
 # Copy EA files
-COPY --chown=${MT_USER}:${MT_USER} ../MQL4/ "${MT_HOME}/.wine/drive_c/Program Files (x86)/MetaTrader 4/MQL4/"
+COPY --chown=${MT_USER}:${MT_USER} MQL4/ /home/mt4/mt4-mql/
 
 # Make scripts executable
 RUN chmod +x ${MT_HOME}/scripts/*.sh

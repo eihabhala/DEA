@@ -9,6 +9,12 @@ MT5_DIR="/home/mt5/.wine/drive_c/Program Files/MetaTrader 5"
 CONFIG_DIR="/home/mt5/config"
 LOG_DIR="/home/mt5/logs"
 
+# Ensure we're running as the mt5 user
+if [ "$(id -u)" -ne "$(id -u mt5 2>/dev/null || echo 1000)" ]; then
+    echo "This script must be run as the mt5 user" >&2
+    exit 1
+fi
+
 # Logging function
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_DIR/startup.log"
@@ -21,6 +27,38 @@ wait_for_x() {
         sleep 1
     done
     log "X server is ready"
+}
+
+# Initialize Wine if not already done
+init_wine() {
+    log "Initializing Wine..."
+    
+    # Set Wine prefix
+    export WINEPREFIX="/home/mt5/.wine"
+    
+    # Check if Wine is already initialized
+    if [[ ! -d "$WINEPREFIX" ]]; then
+        log "Creating Wine prefix..."
+        winecfg /v win10
+    else
+        log "Wine prefix already exists"
+    fi
+    
+    # Install core fonts if not already installed
+    if [[ ! -f "$WINEPREFIX/drive_c/windows/Fonts/arial.ttf" ]]; then
+        log "Installing core fonts..."
+        winetricks -q corefonts
+    else
+        log "Core fonts already installed"
+    fi
+    
+    # Install Visual C++ 2019 runtime if not already installed
+    if ! wine reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall" | grep -q "Microsoft Visual C++ 2019"; then
+        log "Installing Visual C++ 2019 runtime..."
+        winetricks -q vcrun2019
+    else
+        log "Visual C++ 2019 runtime already installed"
+    fi
 }
 
 # Configure MetaTrader 5
@@ -71,6 +109,7 @@ start_mt5() {
     
     # Set display
     export DISPLAY=:1
+    export WINEPREFIX="/home/mt5/.wine"
     
     # Start MT5 with Wine
     wine terminal64.exe /config:"$MT5_DIR/config/terminal.ini" /portable
@@ -82,6 +121,9 @@ main() {
     
     # Wait for X server
     wait_for_x
+    
+    # Initialize Wine
+    init_wine
     
     # Configure MT5
     configure_mt5

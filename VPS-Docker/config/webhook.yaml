@@ -1,0 +1,33 @@
+# Webhook Server Configuration for DEA Trading System
+
+server:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+  
+webhook:
+  token: "dea_secure_webhook_token_2024"
+  rate_limit: 1000  # requests per minute per IP
+  allowed_ips: []   # empty list means all IPs allowed
+  
+metatrader:
+  communication_port: 8081
+  connection_timeout: 5
+  retry_attempts: 3
+  
+logging:
+  level: "INFO"
+  file: "/app/logs/webhook.log"
+  max_size_mb: 10
+  backup_count: 5
+  
+trading:
+  max_positions: 5
+  risk_percent: 2.0
+  max_lot_size: 1.0
+  min_lot_size: 0.01
+  
+security:
+  validate_signals: true
+  log_all_requests: true
+  block_malformed_requests: true

@@ -12,14 +12,18 @@ ENV MT_USER=mt5
 ENV MT_HOME=/home/${MT_USER}
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    # Wine dependencies
-    wine64 \
+RUN dpkg --add-architecture i386 \
+    && apt-get update \
+    && apt-get install -y \
+    # Wine dependencies (both 32-bit and 64-bit)
+    wine \
     winetricks \
     # X11 and VNC
     xvfb \
     x11vnc \
     fluxbox \
+    # VNC password utility
+    tightvncserver \
     # Networking and utilities
     wget \
     curl \
@@ -29,7 +33,6 @@ RUN apt-get update && apt-get install -y \
     htop \
     procps \
     net-tools \
-    # Cleanup
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -40,11 +43,6 @@ RUN useradd -m -s /bin/bash ${MT_USER} \
 # Switch to MT user
 USER ${MT_USER}
 WORKDIR ${MT_HOME}
-
-# Initialize Wine prefix
-RUN winecfg /v win10 \
-    && winetricks -q vcrun2019 \
-    && winetricks -q corefonts
 
 # Create necessary directories
 RUN mkdir -p \
@@ -64,7 +62,7 @@ COPY --chown=${MT_USER}:${MT_USER} scripts/ ${MT_HOME}/scripts/
 COPY --chown=${MT_USER}:${MT_USER} config/ ${MT_HOME}/config/
 
 # Copy EA files
-COPY --chown=${MT_USER}:${MT_USER} ../MQL5/ "${MT_HOME}/.wine/drive_c/Program Files/MetaTrader 5/MQL5/"
+COPY --chown=${MT_USER}:${MT_USER} MQL5/ /home/mt5/mt5-mql/
 
 # Make scripts executable
 RUN chmod +x ${MT_HOME}/scripts/*.sh
