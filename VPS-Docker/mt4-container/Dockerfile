@@ -21,6 +21,8 @@ RUN dpkg --add-architecture i386 \
     xvfb \
     x11vnc \
     fluxbox \
+    # VNC password utility
+    tightvncserver \
     # Networking and utilities
     wget \
     curl \
@@ -42,11 +44,15 @@ RUN useradd -m -s /bin/bash ${MT_USER} \
 USER ${MT_USER}
 WORKDIR ${MT_HOME}
 
-# Initialize Wine prefix for 32-bit
+# Set Wine architecture
 ENV WINEARCH=win32
-RUN winecfg /v win10 \
-    && winetricks -q vcrun2019 \
-    && winetricks -q corefonts
+ENV WINEPREFIX=${MT_HOME}/.wine
+
+# Create Wine prefix
+RUN winecfg /v win10
+
+# Install core fonts
+RUN winetricks -q corefonts
 
 # Create necessary directories
 RUN mkdir -p \
@@ -76,12 +82,6 @@ USER root
 
 # Copy supervisor configuration
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Create VNC password file
-RUN mkdir -p /home/${MT_USER}/.vnc \
-    && echo "trading123" | vncpasswd -f > /home/${MT_USER}/.vnc/passwd \
-    && chmod 600 /home/${MT_USER}/.vnc/passwd \
-    && chown -R ${MT_USER}:${MT_USER} /home/${MT_USER}/.vnc
 
 # Expose VNC port
 EXPOSE 5901

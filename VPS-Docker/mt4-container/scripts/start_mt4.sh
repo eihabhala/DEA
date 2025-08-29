@@ -9,6 +9,12 @@ MT4_DIR="/home/mt4/.wine/drive_c/Program Files (x86)/MetaTrader 4"
 CONFIG_DIR="/home/mt4/config"
 LOG_DIR="/home/mt4/logs"
 
+# Ensure we're running as the mt4 user
+if [ "$(id -u)" -ne "$(id -u mt4 2>/dev/null || echo 1000)" ]; then
+    echo "This script must be run as the mt4 user" >&2
+    exit 1
+fi
+
 # Logging function
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_DIR/startup.log"
@@ -21,6 +27,18 @@ wait_for_x() {
         sleep 1
     done
     log "X server is ready"
+}
+
+# Create VNC password file
+create_vnc_password() {
+    log "Creating VNC password file..."
+    
+    # Create VNC directory if it doesn't exist
+    mkdir -p /home/mt4/.vnc
+    
+    # Create VNC password file
+    echo "trading123" | vncpasswd -f > /home/mt4/.vnc/passwd
+    chmod 600 /home/mt4/.vnc/passwd
 }
 
 # Configure MetaTrader 4
@@ -82,6 +100,9 @@ main() {
     
     # Wait for X server
     wait_for_x
+    
+    # Create VNC password
+    create_vnc_password
     
     # Configure MT4
     configure_mt4

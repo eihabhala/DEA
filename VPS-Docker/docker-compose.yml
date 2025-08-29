@@ -104,6 +104,40 @@ services:
     profiles:
       - mt5
 
+  # noVNC for MetaTrader 4
+  novnc-mt4:
+    image: theasp/novnc:latest
+    container_name: dea-novnc-mt4
+    ports:
+      - "6080:8080"  # noVNC web interface
+    environment:
+      - VNC_SERVER=metatrader4:5901
+      - VNC_PASSWORD=trading123
+    restart: unless-stopped
+    depends_on:
+      - metatrader4
+    networks:
+      - trading-network
+    profiles:
+      - mt4
+
+  # noVNC for MetaTrader 5
+  novnc-mt5:
+    image: theasp/novnc:latest
+    container_name: dea-novnc-mt5
+    ports:
+      - "6081:8080"  # noVNC web interface
+    environment:
+      - VNC_SERVER=metatrader5:5901
+      - VNC_PASSWORD=trading123
+    restart: unless-stopped
+    depends_on:
+      - metatrader5
+    networks:
+      - trading-network
+    profiles:
+      - mt5
+
   # Prometheus for monitoring
   prometheus:
     image: prom/prometheus:latest
